@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+  <title>Pokemon Quiz</title>
+  <style>
+    
+    body {
+      text-align: center;
+      margin-top: 50px;
+      background-color: beige;}
+    img {
+      max-width: 50px;
+      max-height: 60px;}
+    #pokemonList {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2px;
+      margin-top: 10px;}
+    .blankEntry {
+      width: 50px;
+      height: 110px;
+      border-style: solid;
+      border-width: 4px ;
+      border-color: black;
+      background-color: grey;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;}
+  </style>
+</head>
+<body>
+
+  <label for="pokemonInput">Generation 1 Pokemon: </label>
+  <input type="text" id="pokemonInput" placeholder="Enter Pokemon" oninput = "fetchPokemon()">
+  
+  <div id="pokemonList">
+    <!-- Pokémon list will be displayed here -->
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      PokemonList();
+    });
+
+    function PokemonList() {
+      const pokemonList = document.getElementById('pokemonList');
+
+      for (let i = 1; i <= 151; i++) {
+        const blankEntry = document.createElement('div');
+        blankEntry.className = 'blankEntry';
+        blankEntry.innerHTML = `<p>${i}</p>`;
+        pokemonList.appendChild(blankEntry);
+      }
+    }
+
+    function fetchPokemon() {
+      const inputElement = document.getElementById('pokemonInput');
+      const pokemonName = inputElement.value.toLowerCase(); //converts to lower 
+
+      // If the input is Nidoran, fetch data for both Nidoran f and m
+      if (pokemonName === 'nidoran') {
+        fetch(`https://pokeapi.co/api/v2/pokemon/nidoran-f/`)
+          .then(response => response.json())
+          .then(data => {
+            displayPokemon(data);
+            inputElement.value = ""
+          });
+
+        fetch(`https://pokeapi.co/api/v2/pokemon/nidoran-m/`)
+          .then(response => response.json())
+          .then(data => {
+            displayPokemon(data);
+            inputElement.value = ""
+          });
+
+        return;
+      }
+
+      // Fetch data for the entered Pokémon name
+      fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}/`)
+        .then(response => response.json())
+        .then(data => {
+          displayPokemon(data);
+          inputElement.value = "";
+        });
+     
+  }
+
+    
+
+    function displayPokemon(data) {
+      const pokemonList = document.getElementById('pokemonList');
+      const imageUrl = data.sprites.front_default;
+
+      if (imageUrl) {
+        const dexNumber = data.id;
+        const pokemonEntry = createPokemonEntry(imageUrl, dexNumber, data.name);
+        
+        // Update the entry in the list
+        updatePokemonList(pokemonList, dexNumber, pokemonEntry);
+      } 
+    }
+    
+    
+
+    function createPokemonEntry(imageUrl, dexNumber, pokemonName) {
+      const pokemonEntry = document.createElement('div');
+      pokemonEntry.innerHTML = `
+        <img src="${imageUrl}" alt="${dexNumber}">
+        <p>${pokemonName}</p>
+      `;
+      return pokemonEntry;
+    }
+
+    function updatePokemonList(list, dexNumber, entry) {
+      // Find the blank entry and replace it
+      const blankEntry = list.querySelector(`.blankEntry:nth-child(${dexNumber})`);
+      if (blankEntry) {
+        list.replaceChild(entry, blankEntry);
+      }
+      else {
+        alert("Not a generation 1 Pokemon or has already be typed");
+      }
+    }
+    
+  </script>
+
+</body>
+</html>
